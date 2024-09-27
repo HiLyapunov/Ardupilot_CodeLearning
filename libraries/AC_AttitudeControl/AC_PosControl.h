@@ -92,61 +92,61 @@ public:      //public 关键词表示该类的公共成员和方法可以被外�
     float get_max_accel_xy_cmss() const { return _accel_max_xy_cmss; }  //获取最大水平加速度
 
     // set the maximum horizontal position error that will be allowed in the horizontal plane
-    void set_pos_error_max_xy_cm(float error_max) { _p_pos_xy.set_error_max(error_max); }
-    float get_pos_error_max_xy_cm() { return _p_pos_xy.get_error_max(); }
+    void set_pos_error_max_xy_cm(float error_max) { _p_pos_xy.set_error_max(error_max); } //设置修正速度和加速度限制
+    float get_pos_error_max_xy_cm() { return _p_pos_xy.get_error_max(); }  //获取最大水平速度和加速度
 
     /// init_xy_controller_stopping_point - initialise the position controller to the stopping point with zero velocity and acceleration.
     ///     This function should be used when the expected kinematic path assumes a stationary initial condition but does not specify a specific starting position.
     ///     The starting position can be retrieved by getting the position target using get_pos_target_cm() after calling this function.
-    void init_xy_controller_stopping_point();
+    void init_xy_controller_stopping_point(); //初始化停止点
 
     // relax_velocity_controller_xy - initialise the position controller to the current position and velocity with decaying acceleration.
     ///     This function decays the output acceleration by 95% every half second to achieve a smooth transition to zero requested acceleration.
-    void relax_velocity_controller_xy();
+    void relax_velocity_controller_xy(); //平滑地放松速度控制器
 
     /// reduce response for landing
-    void soften_for_landing_xy();
+    void soften_for_landing_xy(); //着陆时减缓响应
 
     // init_xy_controller - initialise the position controller to the current position, velocity, acceleration and attitude.
     ///     This function is the default initialisation for any position control that provides position, velocity and acceleration.
     ///     This function is private and contains all the shared xy axis initialisation functions
-    void init_xy_controller();
+    void init_xy_controller(); //初始化XY位置控制器
 
     /// input_accel_xy - calculate a jerk limited path from the current position, velocity and acceleration to an input acceleration.
     ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
     ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_xy.
     ///     The jerk limit defines the acceleration error decay in the kinematic path as the system approaches constant acceleration.
     ///     The jerk limit also defines the time taken to achieve the maximum acceleration.
-    void input_accel_xy(const Vector3f& accel);
+    void input_accel_xy(const Vector3f& accel); //输入加速度并生成路径
 
     /// input_vel_accel_xy - calculate a jerk limited path from the current position, velocity and acceleration to an input velocity and acceleration.
     ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
     ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_xy.
     ///     The function alters the vel to be the kinematic path based on accel
     ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-    void input_vel_accel_xy(Vector2f& vel, const Vector2f& accel, bool limit_output = true);
+    void input_vel_accel_xy(Vector2f& vel, const Vector2f& accel, bool limit_output = true); // 输入速度和加速度并生成路径
 
     /// input_pos_vel_accel_xy - calculate a jerk limited path from the current position, velocity and acceleration to an input position velocity and acceleration.
     ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
     ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_xy.
     ///     The function alters the pos and vel to be the kinematic path based on accel
     ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-    void input_pos_vel_accel_xy(Vector2p& pos, Vector2f& vel, const Vector2f& accel, bool limit_output = true);
+    void input_pos_vel_accel_xy(Vector2p& pos, Vector2f& vel, const Vector2f& accel, bool limit_output = true); //输入位置、速度和加速度并生成路径
 
     // is_active_xy - returns true if the xy position controller has been run in the previous 5 loop times
-    bool is_active_xy() const;
+    bool is_active_xy() const; //判断XY位置控制器是否活跃
 
     /// stop_pos_xy_stabilisation - sets the target to the current position to remove any position corrections from the system
-    void stop_pos_xy_stabilisation();
+    void stop_pos_xy_stabilisation(); //停止位置稳定
 
     /// stop_vel_xy_stabilisation - sets the target to the current position and velocity to the current velocity to remove any position and velocity corrections from the system
-    void stop_vel_xy_stabilisation();
+    void stop_vel_xy_stabilisation(); //停止速度稳定
 
     /// update_xy_controller - runs the horizontal position controller correcting position, velocity and acceleration errors.
     ///     Position and velocity errors are converted to velocity and acceleration targets using PID objects
     ///     Desired velocity and accelerations are added to these corrections as they are calculated
     ///     Kinematically consistent target position and desired velocity and accelerations should be provided before calling this function
-    void update_xy_controller();
+    void update_xy_controller(); //更新水平位置控制器
 
     ///
     /// Vertical position controller
@@ -156,24 +156,24 @@ public:      //public 关键词表示该类的公共成员和方法可以被外�
     ///     speed_down can be positive or negative but will always be interpreted as a descent speed
     ///     This can be done at any time as changes in these parameters are handled smoothly
     ///     by the kinematic shaping.
-    void set_max_speed_accel_z(float speed_down, float speed_up, float accel_cmss);
+    void set_max_speed_accel_z(float speed_down, float speed_up, float accel_cmss); //设置最大垂直速度和加速度
 
     /// set_correction_speed_accel_z - set the position controller correction velocity and acceleration limit
     ///     speed_down can be positive or negative but will always be interpreted as a descent speed
     ///     This should be done only during initialisation to avoid discontinuities
-    void set_correction_speed_accel_z(float speed_down, float speed_up, float accel_cmss);
+    void set_correction_speed_accel_z(float speed_down, float speed_up, float accel_cmss); //设置垂直误差修正的速度和加速度限制
 
     /// get_max_accel_z_cmss - get the maximum vertical acceleration in cm/s/s
-    float get_max_accel_z_cmss() const { return _accel_max_z_cmss; }
+    float get_max_accel_z_cmss() const { return _accel_max_z_cmss; } //获取最大垂直加速度
 
     // get_pos_error_z_up_cm - get the maximum vertical position error up that will be allowed
-    float get_pos_error_z_up_cm() { return _p_pos_z.get_error_max(); }
+    float get_pos_error_z_up_cm() { return _p_pos_z.get_error_max(); } //获取最大垂直位置误差
 
     // get_pos_error_z_down_cm - get the maximum vertical position error down that will be allowed
-    float get_pos_error_z_down_cm() { return _p_pos_z.get_error_min(); }
+    float get_pos_error_z_down_cm() { return _p_pos_z.get_error_min(); } 
 
     /// get_max_speed_up_cms - accessors for current maximum up speed in cm/s
-    float get_max_speed_up_cms() const { return _vel_max_up_cms; }
+    float get_max_speed_up_cms() const { return _vel_max_up_cms; }//获取最大上升和下降速度
 
     /// get_max_speed_down_cms - accessors for current maximum down speed in cm/s.  Will be a negative number
     float get_max_speed_down_cms() const { return _vel_max_down_cms; }
@@ -181,174 +181,174 @@ public:      //public 关键词表示该类的公共成员和方法可以被外�
     /// init_z_controller_no_descent - initialise the position controller to the current position, velocity, acceleration and attitude.
     ///     This function is the default initialisation for any position control that provides position, velocity and acceleration.
     ///     This function does not allow any negative velocity or acceleration
-    void init_z_controller_no_descent();
+    void init_z_controller_no_descent(); //初始化垂直位置控制器（禁止下降）
 
     /// init_z_controller_stopping_point - initialise the position controller to the stopping point with zero velocity and acceleration.
     ///     This function should be used when the expected kinematic path assumes a stationary initial condition but does not specify a specific starting position.
     ///     The starting position can be retrieved by getting the position target using get_pos_target_cm() after calling this function.
-    void init_z_controller_stopping_point();
+    void init_z_controller_stopping_point(); //初始化为静止状态
 
     // relax_z_controller - initialise the position controller to the current position and velocity with decaying acceleration.
     ///     This function decays the output acceleration by 95% every half second to achieve a smooth transition to zero requested acceleration.
-    void relax_z_controller(float throttle_setting);
+    void relax_z_controller(float throttle_setting); //平滑衰减Z轴加速度
 
     // init_z_controller - initialise the position controller to the current position, velocity, acceleration and attitude.
     ///     This function is the default initialisation for any position control that provides position, velocity and acceleration.
     ///     This function is private and contains all the shared z axis initialisation functions
-    void init_z_controller();
+    void init_z_controller(); //初始化Z轴控制器
 
     /// input_accel_z - calculate a jerk limited path from the current position, velocity and acceleration to an input acceleration.
     ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
     ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_z.
-    virtual void input_accel_z(float accel);
+    virtual void input_accel_z(float accel); //输入加速度并生成路径
 
     /// input_vel_accel_z - calculate a jerk limited path from the current position, velocity and acceleration to an input velocity and acceleration.
     ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
     ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_z.
     ///     The function alters the vel to be the kinematic path based on accel
     ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-    virtual void input_vel_accel_z(float &vel, float accel, bool limit_output = true);
+    virtual void input_vel_accel_z(float &vel, float accel, bool limit_output = true); //输入速度和加速度并生成路径
 
     /// set_pos_target_z_from_climb_rate_cm - adjusts target up or down using a commanded climb rate in cm/s
     ///     using the default position control kinematic path.
     ///     The zero target altitude is varied to follow pos_offset_z
-    void set_pos_target_z_from_climb_rate_cm(float vel);
+    void set_pos_target_z_from_climb_rate_cm(float vel); //通过爬升率调整目标位置
 
     /// land_at_climb_rate_cm - adjusts target up or down using a commanded climb rate in cm/s
     ///     using the default position control kinematic path.
     ///     ignore_descent_limit turns off output saturation handling to aid in landing detection. ignore_descent_limit should be true unless landing.
-    void land_at_climb_rate_cm(float vel, bool ignore_descent_limit);
+    void land_at_climb_rate_cm(float vel, bool ignore_descent_limit); //以指定爬升率着陆
 
     /// input_pos_vel_accel_z - calculate a jerk limited path from the current position, velocity and acceleration to an input position velocity and acceleration.
     ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
     ///     The function alters the pos and vel to be the kinematic path based on accel
     ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-    void input_pos_vel_accel_z(float &pos, float &vel, float accel, bool limit_output = true);
+    void input_pos_vel_accel_z(float &pos, float &vel, float accel, bool limit_output = true); //输入位置、速度和加速度并生成路径
 
     /// set_alt_target_with_slew - adjusts target up or down using a commanded altitude in cm
     ///     using the default position control kinematic path.
-    void set_alt_target_with_slew(float pos);
+    void set_alt_target_with_slew(float pos); //以指定高度目标调整位置
 
     /// update_pos_offset_z - updates the vertical offsets used by terrain following
-    void update_pos_offset_z(float pos_offset);
+    void update_pos_offset_z(float pos_offset); // 更新垂直偏移量（用于地形跟踪）
 
     // is_active_z - returns true if the z position controller has been run in the previous 5 loop times
-    bool is_active_z() const;
+    bool is_active_z() const; //判断Z轴控制器是否活跃
 
     /// update_z_controller - runs the vertical position controller correcting position, velocity and acceleration errors.
     ///     Position and velocity errors are converted to velocity and acceleration targets using PID objects
     ///     Desired velocity and accelerations are added to these corrections as they are calculated
     ///     Kinematically consistent target position and desired velocity and accelerations should be provided before calling this function
-    void update_z_controller();
+    void update_z_controller(); //更新垂直位置控制器
 
 
 
     ///
-    /// Accessors
+    /// Accessors //访问器
     ///
 
-    /// set commanded position (cm), velocity (cm/s) and acceleration (cm/s/s) inputs when the path is created externally.
+    /// set commanded position (cm), velocity (cm/s) and acceleration (cm/s/s) inputs when the path is created externally. //设置3D位置、速度和加速度，通常不会直接作用于控制器
     void set_pos_vel_accel(const Vector3p& pos, const Vector3f& vel, const Vector3f& accel);
     void set_pos_vel_accel_xy(const Vector2p& pos, const Vector2f& vel, const Vector2f& accel);
 
 
-    /// Position
+    /// Position //位置管理
 
-    /// set_pos_target_xy_cm - sets the position target, frame NEU in cm relative to the EKF origin
+    /// set_pos_target_xy_cm - sets the position target, frame NEU in cm relative to the EKF origin  //设置水平面（XY平面）的目标位置
     void set_pos_target_xy_cm(float pos_x, float pos_y) { _pos_target.x = pos_x; _pos_target.y = pos_y; }
 
-    /// get_pos_target_cm - returns the position target, frame NEU in cm relative to the EKF origin
+    /// get_pos_target_cm - returns the position target, frame NEU in cm relative to the EKF origin //获取当前的目标位置
     const Vector3p& get_pos_target_cm() const { return _pos_target; }
 
-    /// set_pos_target_z_cm - set altitude target in cm above the EKF origin
+    /// set_pos_target_z_cm - set altitude target in cm above the EKF origin //设置垂直方向（Z轴）的目标高度
     void set_pos_target_z_cm(float pos_target) { _pos_target.z = pos_target; }
 
-    /// get_pos_target_z_cm - get target altitude (in cm above the EKF origin)
+    /// get_pos_target_z_cm - get target altitude (in cm above the EKF origin) //获取当前目标高度
     float get_pos_target_z_cm() const { return _pos_target.z; }
 
-    /// get_stopping_point_xy_cm - calculates stopping point in NEU cm based on current position, velocity, vehicle acceleration
+    /// get_stopping_point_xy_cm - calculates stopping point in NEU cm based on current position, velocity, vehicle acceleration //计算水平面（XY平面）的停止点
     void get_stopping_point_xy_cm(Vector2p &stopping_point) const;
 
-    /// get_stopping_point_z_cm - calculates stopping point in NEU cm based on current position, velocity, vehicle acceleration
+    /// get_stopping_point_z_cm - calculates stopping point in NEU cm based on current position, velocity, vehicle acceleration //计算垂直方向（Z轴）的停止点
     void get_stopping_point_z_cm(postype_t &stopping_point) const;
 
-    /// get_pos_error_cm - get position error vector between the current and target position
+    /// get_pos_error_cm - get position error vector between the current and target position //获取当前位置与目标位置的误差向量
     const Vector3f get_pos_error_cm() const { return (_pos_target - _inav.get_position_neu_cm().topostype()).tofloat(); }
 
-    /// get_pos_error_xy_cm - get the length of the position error vector in the xy plane
+    /// get_pos_error_xy_cm - get the length of the position error vector in the xy plane //获取水平面（XY平面）的误差距离
     float get_pos_error_xy_cm() const { return get_horizontal_distance_cm(_inav.get_position_xy_cm().topostype(), _pos_target.xy()); }
 
-    /// get_pos_error_z_cm - returns altitude error in cm
+    /// get_pos_error_z_cm - returns altitude error in cm //获取垂直方向的高度误差
     float get_pos_error_z_cm() const { return (_pos_target.z - _inav.get_position_z_up_cm()); }
 
 
-    /// Velocity
+    /// Velocity //速度管理
 
-    /// set_vel_desired_cms - sets desired velocity in NEU cm/s
+    /// set_vel_desired_cms - sets desired velocity in NEU cm/s //设置期望的3D速度
     void set_vel_desired_cms(const Vector3f &des_vel) { _vel_desired = des_vel; }
 
-    /// set_vel_desired_xy_cms - sets horizontal desired velocity in NEU cm/s
+    /// set_vel_desired_xy_cms - sets horizontal desired velocity in NEU cm/s //设置水平面的期望速度
     void set_vel_desired_xy_cms(const Vector2f &vel) {_vel_desired.xy() = vel; }
 
-    /// get_vel_desired_cms - returns desired velocity (i.e. feed forward) in cm/s in NEU
+    /// get_vel_desired_cms - returns desired velocity (i.e. feed forward) in cm/s in NEU //获取期望速度
     const Vector3f& get_vel_desired_cms() { return _vel_desired; }
 
-    // get_vel_target_cms - returns the target velocity in NEU cm/s
+    // get_vel_target_cms - returns the target velocity in NEU cm/s //获取目标速度
     const Vector3f& get_vel_target_cms() const { return _vel_target; }
 
-    /// set_vel_desired_z_cms - sets desired velocity in cm/s in z axis
+    /// set_vel_desired_z_cms - sets desired velocity in cm/s in z axis //设置垂直方向的期望速度
     void set_vel_desired_z_cms(float vel_z_cms) {_vel_desired.z = vel_z_cms;}
 
-    /// get_vel_target_z_cms - returns target vertical speed in cm/s
+    /// get_vel_target_z_cms - returns target vertical speed in cm/s //获取垂直方向的目标速度
     float get_vel_target_z_cms() const { return _vel_target.z; }
 
 
-    /// Acceleration
+    /// Acceleration //加速度管理
 
-    // set_accel_desired_xy_cmss set desired acceleration in cm/s in xy axis
+    // set_accel_desired_xy_cmss set desired acceleration in cm/s in xy axis //设置期望的XY轴加速度
     void set_accel_desired_xy_cmss(const Vector2f &accel_cms) { _accel_desired.xy() = accel_cms; }
 
-    // get_accel_target_cmss - returns the target acceleration in NEU cm/s/s
+    // get_accel_target_cmss - returns the target acceleration in NEU cm/s/s //获取目标加速度
     const Vector3f& get_accel_target_cmss() const { return _accel_target; }
 
 
-    /// Offset
+    /// Offset //偏移量管理
 
-    /// set_pos_offset_target_z_cm - set altitude offset target in cm above the EKF origin
+    /// set_pos_offset_target_z_cm - set altitude offset target in cm above the EKF origin //设置目标高度的偏移量
     void set_pos_offset_target_z_cm(float pos_offset_target_z) { _pos_offset_target_z = pos_offset_target_z; }
 
-    /// set_pos_offset_z_cm - set altitude offset in cm above the EKF origin
+    /// set_pos_offset_z_cm - set altitude offset in cm above the EKF origin //设置当前高度的偏移量
     void set_pos_offset_z_cm(float pos_offset_z) { _pos_offset_z = pos_offset_z; }
 
-    /// get_pos_offset_z_cm - returns altitude offset in cm above the EKF origin
+    /// get_pos_offset_z_cm - returns altitude offset in cm above the EKF origin //获取当前高度的偏移量
     float get_pos_offset_z_cm() const { return _pos_offset_z; }
 
-    /// get_vel_offset_z_cm - returns current vertical offset speed in cm/s
+    /// get_vel_offset_z_cm - returns current vertical offset speed in cm/s //获取当前 Z 轴方向的速度偏移量
     float get_vel_offset_z_cms() const { return _vel_offset_z; }
 
-    /// get_accel_offset_z_cm - returns current vertical offset acceleration in cm/s/s
+    /// get_accel_offset_z_cm - returns current vertical offset acceleration in cm/s/s //获取当前 Z 轴方向的加速度偏移量
     float get_accel_offset_z_cmss() const { return _accel_offset_z; }
 
 
-    /// Outputs
+    /// Outputs //输出控制信号
 
-    /// get desired roll and pitch to be passed to the attitude controller
+    /// get desired roll and pitch to be passed to the attitude controller //获取期望的横滚角和俯仰角
     float get_roll_cd() const { return _roll_target; }
     float get_pitch_cd() const { return _pitch_target; }
 
-    /// get desired yaw to be passed to the attitude controller
+    /// get desired yaw to be passed to the attitude controller //获取期望的偏航角和偏航速率
     float get_yaw_cd() const { return _yaw_target; }
 
     /// get desired yaw rate to be passed to the attitude controller
     float get_yaw_rate_cds() const { return _yaw_rate_target; }
 
-    /// get desired roll and pitch to be passed to the attitude controller
+    /// get desired roll and pitch to be passed to the attitude controller //获取推力矢量
     Vector3f get_thrust_vector() const;
 
-    /// get_bearing_to_target_cd - get bearing to target position in centi-degrees
+    /// get_bearing_to_target_cd - get bearing to target position in centi-degrees //获取目标位置的方位角
     int32_t get_bearing_to_target_cd() const;
 
-    /// get_lean_angle_max_cd - returns the maximum lean angle the autopilot may request
+    /// get_lean_angle_max_cd - returns the maximum lean angle the autopilot may request //获取和设置最大倾斜角
     float get_lean_angle_max_cd() const;
 
     /*
@@ -361,90 +361,90 @@ public:      //public 关键词表示该类的公共成员和方法可以被外�
     /// Other
 
     /// get pid controllers
-    AC_P_2D& get_pos_xy_p() { return _p_pos_xy; }
-    AC_P_1D& get_pos_z_p() { return _p_pos_z; }
-    AC_PID_2D& get_vel_xy_pid() { return _pid_vel_xy; }
-    AC_PID_Basic& get_vel_z_pid() { return _pid_vel_z; }
-    AC_PID& get_accel_z_pid() { return _pid_accel_z; }
+    AC_P_2D& get_pos_xy_p() { return _p_pos_xy; } //获取 X-Y 轴的位置控制器
+    AC_P_1D& get_pos_z_p() { return _p_pos_z; }  ////获取 Z 轴的位置控制器
+    AC_PID_2D& get_vel_xy_pid() { return _pid_vel_xy; } //获取 X-Y 轴的速度控制器
+    AC_PID_Basic& get_vel_z_pid() { return _pid_vel_z; }  //获取 Z 轴的速度控制器
+    AC_PID& get_accel_z_pid() { return _pid_accel_z; } //获取 Z 轴的加速度控制器
 
     /// set_limit_accel_xy - mark that accel has been limited
-    ///     this prevents integrator buildup
+    ///     this prevents integrator buildup //限制加速度积累
     void set_externally_limited_xy() { _limit_vector.x = _accel_target.x; _limit_vector.y = _accel_target.y; }
 
-    // lean_angles_to_accel - convert roll, pitch lean angles to lat/lon frame accelerations in cm/s/s
+    // lean_angles_to_accel - convert roll, pitch lean angles to lat/lon frame accelerations in cm/s/s //姿态角到加速度的转换
     Vector3f lean_angles_to_accel(const Vector3f& att_target_euler) const;
 
-    // write PSC and/or PSCZ logs
+    // write PSC and/or PSCZ logs //写入日志
     void write_log();
 
-    // provide feedback on whether arming would be a good idea right now:
+    // provide feedback on whether arming would be a good idea right now: 预启动检查
     bool pre_arm_checks(const char *param_prefix,
                         char *failure_msg,
                         const uint8_t failure_msg_len);
 
-    // enable or disable high vibration compensation
+    // enable or disable high vibration compensation //高振动补偿
     void set_vibe_comp(bool on_off) { _vibe_comp_enabled = on_off; }
 
-    /// get_vel_z_error_ratio - returns the proportion of error relative to the maximum request
+    /// get_vel_z_error_ratio - returns the proportion of error relative to the maximum request //获取 Z 轴速度误差比例
     float get_vel_z_control_ratio() const { return constrain_float(_vel_z_control_ratio, 0.0f, 1.0f); }
 
-    /// crosstrack_error - returns horizontal error to the closest point to the current track
-    float crosstrack_error() const;
+    /// crosstrack_error - returns horizontal error to the closest point to the current track //水平轨道偏离误差
+    float crosstrack_error() const; 
 
     /// standby_xyz_reset - resets I terms and removes position error
     ///     This function will let Loiter and Alt Hold continue to operate
     ///     in the event that the flight controller is in control of the
     ///     aircraft when in standby.
-    void standby_xyz_reset();
+    void standby_xyz_reset(); //积分器 I 项重置，避免积分器过度累积。
 
-    // get earth-frame Z-axis acceleration with gravity removed in cm/s/s with +ve being up
+    // get earth-frame Z-axis acceleration with gravity removed in cm/s/s with +ve being up //获取地球坐标系下的 Z 轴加速度（不包括重力）。
     float get_z_accel_cmss() const { return -(_ahrs.get_accel_ef().z + GRAVITY_MSS) * 100.0f; }
 
-    /// returns true when the forward pitch demand is limited by the maximum allowed tilt
+    /// returns true when the forward pitch demand is limited by the maximum allowed tilt //最大前倾俯仰限制
     bool get_fwd_pitch_is_limited() const { return _fwd_pitch_is_limited; }
     
-    // set disturbance north
+    // set disturbance north //设置位置扰动
     void set_disturb_pos_cm(Vector2f disturb_pos) {_disturb_pos = disturb_pos;}
 
-    // set disturbance north
+    // set disturbance north //设置速度扰动
     void set_disturb_vel_cms(Vector2f disturb_vel) {_disturb_vel = disturb_vel;}
 
     static const struct AP_Param::GroupInfo var_info[];
-
+    //日志记录函数
     static void Write_PSCN(float pos_target, float pos, float vel_desired, float vel_target, float vel, float accel_desired, float accel_target, float accel);
     static void Write_PSCE(float pos_target, float pos, float vel_desired, float vel_target, float vel, float accel_desired, float accel_target, float accel);
     static void Write_PSCD(float pos_target, float pos, float vel_desired, float vel_target, float vel, float accel_desired, float accel_target, float accel);
 
 protected:
 
-    // get throttle using vibration-resistant calculation (uses feed forward with manually calculated gain)
+    // get throttle using vibration-resistant calculation (uses feed forward with manually calculated gain) //油门振动补偿
     float get_throttle_with_vibration_override();
 
-    // lean_angles_to_accel - convert roll, pitch lean angles to lat/lon frame accelerations in cm/s/s
+    // lean_angles_to_accel - convert roll, pitch lean angles to lat/lon frame accelerations in cm/s/s //姿态角到加速度的转换
     void accel_to_lean_angles(float accel_x_cmss, float accel_y_cmss, float& roll_target, float& pitch_target) const;
 
     // lean_angles_to_accel - convert roll, pitch lean angles to lat/lon frame accelerations in cm/s/s
     void lean_angles_to_accel_xy(float& accel_x_cmss, float& accel_y_cmss) const;
 
-    // calculate_yaw_and_rate_yaw - calculate the vehicle yaw and rate of yaw.
+    // calculate_yaw_and_rate_yaw - calculate the vehicle yaw and rate of yaw. //偏航角与偏航速率计算
     void calculate_yaw_and_rate_yaw();
 
-    // calculate_overspeed_gain - calculated increased maximum acceleration and jerk if over speed condition is detected
+    // calculate_overspeed_gain - calculated increased maximum acceleration and jerk if over speed condition is detected //超速增益计算
     float calculate_overspeed_gain();
 
-    /// initialise and check for ekf position resets
+    /// initialise and check for ekf position resets //EKF复位处理
     void init_ekf_xy_reset();
     void handle_ekf_xy_reset();
     void init_ekf_z_reset();
     void handle_ekf_z_reset();
 
-    // references to inertial nav and ahrs libraries
+    // references to inertial nav and ahrs libraries //内部参数与控制器引用（取别名）
     AP_AHRS_View&           _ahrs;
     const AP_InertialNav&   _inav;
     const class AP_Motors&  _motors;
     AC_AttitudeControl&     _attitude_control;
 
-    // parameters
+    // parameters //控制器变量 （声明类创建的对象）
     AP_Float        _lean_angle_max;    // Maximum autopilot commanded angle (in degrees). Set to zero for Angle Max
     AP_Float        _shaping_jerk_xy;   // Jerk limit of the xy kinematic path generation in m/s^3 used to determine how quickly the aircraft varies the acceleration target
     AP_Float        _shaping_jerk_z;    // Jerk limit of the z kinematic path generation in m/s^3 used to determine how quickly the aircraft varies the acceleration target
@@ -454,7 +454,7 @@ protected:
     AC_PID_Basic    _pid_vel_z;         // Z axis velocity controller to convert climb rate error to desired acceleration
     AC_PID          _pid_accel_z;       // Z axis acceleration controller to convert desired acceleration to throttle output
 
-    // internal variables
+    // internal variables //内部变量
     float       _dt;                    // time difference (in seconds) since the last loop time
     uint32_t    _last_update_xy_ticks;  // ticks of last last update_xy_controller call
     uint32_t    _last_update_z_ticks;   // ticks of last update_z_controller call
@@ -469,13 +469,13 @@ protected:
     Vector2f    _disturb_pos;           // position disturbance generated by system ID mode
     Vector2f    _disturb_vel;           // velocity disturbance generated by system ID mode
 
-    // output from controller
+    // output from controller //控制器输出
     float       _roll_target;           // desired roll angle in centi-degrees calculated by position controller
     float       _pitch_target;          // desired roll pitch in centi-degrees calculated by position controller
     float       _yaw_target;            // desired yaw in centi-degrees calculated by position controller
     float       _yaw_rate_target;       // desired yaw rate in centi-degrees per second calculated by position controller
 
-    // position controller internal variables
+    // position controller internal variables //控制器与内部变量
     Vector3p    _pos_target;            // target location, frame NEU in cm relative to the EKF origin
     Vector3f    _vel_desired;           // desired velocity in NEU cm/s
     Vector3f    _vel_target;            // velocity target in NEU cm/s calculated by pos_to_rate step
@@ -494,13 +494,13 @@ protected:
     uint32_t    _ekf_xy_reset_ms;       // system time of last recorded ekf xy position reset
     uint32_t    _ekf_z_reset_ms;        // system time of last recorded ekf altitude reset
 
-    // high vibration handling
+    // high vibration handling //高振动补偿和最大倾角
     bool        _vibe_comp_enabled;     // true when high vibration compensation is on
 
     // angle max override, if zero then use ANGLE_MAX parameter
     float       _angle_max_override_cd;
 
-    // return true if on a real vehicle or SITL with lock-step scheduling
+    // return true if on a real vehicle or SITL with lock-step scheduling //高层次函数
     bool has_good_timing(void) const;
 
 private:
