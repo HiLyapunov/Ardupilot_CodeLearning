@@ -409,7 +409,7 @@ public:      //public 关键词表示该类的公共成员和方法可以被外�
     // set disturbance north //设置速度扰动
     void set_disturb_vel_cms(Vector2f disturb_vel) {_disturb_vel = disturb_vel;}
 
-    static const struct AP_Param::GroupInfo var_info[];
+    static const struct AP_Param::GroupInfo var_info[];//声明一个静态常量成员，类型为 AP_Param::GroupInfo 的结构体，用于存储参数表。//这里struct是为了可读性强调，实际上AP_Param::GroupInfo 已经是结构体类型
     //日志记录函数
     static void Write_PSCN(float pos_target, float pos, float vel_desired, float vel_target, float vel, float accel_desired, float accel_target, float accel);
     static void Write_PSCE(float pos_target, float pos, float vel_desired, float vel_target, float vel, float accel_desired, float accel_target, float accel);

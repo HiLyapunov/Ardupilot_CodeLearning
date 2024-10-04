@@ -77,7 +77,7 @@ extern const AP_HAL::HAL& hal;
 #define POSCONTROL_VIBE_COMP_P_GAIN 0.250f
 #define POSCONTROL_VIBE_COMP_I_GAIN 0.125f
 
-const AP_Param::GroupInfo AC_PosControl::var_info[] = {
+const AP_Param::GroupInfo AC_PosControl::var_info[] = { //vara_info是AC_PosControl的一个静态成员变量结构体，虽然已经在头文件中声明为结构体但是还是需要在cpp文件中再次明确定义数据类型，其数据类型是AP_Param::GroupInfo，const表示常量
     // 0 was used for HOVER
 
     // @Param: _ACC_XY_FILT
@@ -330,15 +330,18 @@ const AP_Param::GroupInfo AC_PosControl::var_info[] = {
 //
 AC_PosControl::AC_PosControl(AP_AHRS_View& ahrs, const AP_InertialNav& inav,
                              const AP_Motors& motors, AC_AttitudeControl& attitude_control) :
+    // 初始化列表
     _ahrs(ahrs),
     _inav(inav),
     _motors(motors),
     _attitude_control(attitude_control),
+    // 初始化 PID 和其他控制参数。这些参数是已经被全局定义的常量，所以可以直接放在这里
     _p_pos_z(POSCONTROL_POS_Z_P),
     _pid_vel_z(POSCONTROL_VEL_Z_P, 0.0f, 0.0f, 0.0f, POSCONTROL_VEL_Z_IMAX, POSCONTROL_VEL_Z_FILT_HZ, POSCONTROL_VEL_Z_FILT_D_HZ),
     _pid_accel_z(POSCONTROL_ACC_Z_P, POSCONTROL_ACC_Z_I, POSCONTROL_ACC_Z_D, 0.0f, POSCONTROL_ACC_Z_IMAX, 0.0f, POSCONTROL_ACC_Z_FILT_HZ, 0.0f),
     _p_pos_xy(POSCONTROL_POS_XY_P),
     _pid_vel_xy(POSCONTROL_VEL_XY_P, POSCONTROL_VEL_XY_I, POSCONTROL_VEL_XY_D, 0.0f, POSCONTROL_VEL_XY_IMAX, POSCONTROL_VEL_XY_FILT_HZ, POSCONTROL_VEL_XY_FILT_D_HZ),
+    // 初始化速度和加速度相关参数。这些参数是已经被全局定义的常量，所以可以直接放在这里
     _vel_max_down_cms(POSCONTROL_SPEED_DOWN),
     _vel_max_up_cms(POSCONTROL_SPEED_UP),
     _vel_max_xy_cms(POSCONTROL_SPEED),
@@ -347,7 +350,7 @@ AC_PosControl::AC_PosControl(AP_AHRS_View& ahrs, const AP_InertialNav& inav,
     _jerk_max_xy_cmsss(POSCONTROL_JERK_XY * 100.0),
     _jerk_max_z_cmsss(POSCONTROL_JERK_Z * 100.0)
 {
-    AP_Param::setup_object_defaults(this, var_info);
+    AP_Param::setup_object_defaults(this, var_info); //`AP_Param` 类的**静态成员函数**调用，用于配置默认参数。为了增强可读性，代码创作者把繁杂的配置逻辑放在了AP_Param的一个成员函数中。
 }
 
 
@@ -437,10 +440,10 @@ float AC_PosControl::pos_offset_z_scaler(float pos_offset_z, float pos_offset_z_
 ///     This function only needs to be called if using the kinematic shaping.
 ///     This can be done at any time as changes in these parameters are handled smoothly
 ///     by the kinematic shaping.
-void AC_PosControl::set_max_speed_accel_xy(float speed_cms, float accel_cmss)
+void AC_PosControl::set_max_speed_accel_xy(float speed_cms, float accel_cmss) //设置无人机在水平面的最大速度（单位为 cm/s）和最大加速度（单位为 cm/s²），主要用于无人机在横向运动中的速度和加速度限制。
 {
-    _vel_max_xy_cms = speed_cms;
-    _accel_max_xy_cmss = accel_cmss;
+    _vel_max_xy_cms = speed_cms; //外部调用set_max_speed_accel_xy函数的时候会传参给speed_cms和accel_cmss局部变量（仅仅在set_max_speed_accel_xy函数中生效，
+    _accel_max_xy_cmss = accel_cmss; //这里的_vel_max_xy_cms和_accel_max_xy_cmss则是成员变量，可以在函数外部使用
 
     // ensure the horizontal jerk is less than the vehicle is capable of
     const float jerk_max_cmsss = MIN(_attitude_control.get_ang_vel_roll_max_rads(), _attitude_control.get_ang_vel_pitch_max_rads()) * GRAVITY_MSS * 100.0;
@@ -462,7 +465,7 @@ void AC_PosControl::set_max_speed_accel_xy(float speed_cms, float accel_cmss)
 
 /// set_max_speed_accel_xy - set the position controller correction velocity and acceleration limit
 ///     This should be done only during initialisation to avoid discontinuities
-void AC_PosControl::set_correction_speed_accel_xy(float speed_cms, float accel_cmss)
+void AC_PosControl::set_correction_speed_accel_xy(float speed_cms, float accel_cmss) //横向修正速度加速度函数
 {
     _p_pos_xy.set_limits(speed_cms, accel_cmss, 0.0f);
 }
@@ -470,7 +473,7 @@ void AC_PosControl::set_correction_speed_accel_xy(float speed_cms, float accel_c
 /// init_xy_controller_stopping_point - initialise the position controller to the stopping point with zero velocity and acceleration.
 ///     This function should be used when the expected kinematic path assumes a stationary initial condition but does not specify a specific starting position.
 ///     The starting position can be retrieved by getting the position target using get_pos_target_cm() after calling this function.
-void AC_PosControl::init_xy_controller_stopping_point()
+void AC_PosControl::init_xy_controller_stopping_point()  //停止函数
 {
     init_xy_controller();
 
@@ -481,7 +484,7 @@ void AC_PosControl::init_xy_controller_stopping_point()
 
 // relax_velocity_controller_xy - initialise the position controller to the current position and velocity with decaying acceleration.
 ///     This function decays the output acceleration by 95% every half second to achieve a smooth transition to zero requested acceleration.
-void AC_PosControl::relax_velocity_controller_xy()
+void AC_PosControl::relax_velocity_controller_xy() //平滑速度函数
 {
     // decay acceleration and therefore current attitude target to zero
     // this will be reset by init_xy_controller() if !is_active_xy()
@@ -494,7 +497,7 @@ void AC_PosControl::relax_velocity_controller_xy()
 }
 
 /// reduce response for landing
-void AC_PosControl::soften_for_landing_xy()
+void AC_PosControl::soften_for_landing_xy() //平稳着陆规划器，让无人机在着陆时的水平位置误差趋近0，保证着陆过程中避免横向移动
 {
     // decay position error to zero
     if (is_positive(_dt)) {
@@ -508,9 +511,10 @@ void AC_PosControl::soften_for_landing_xy()
 
 /// init_xy_controller - initialise the position controller to the current position, velocity, acceleration and attitude.
 ///     This function is the default initialisation for any position control that provides position, velocity and acceleration.
-void AC_PosControl::init_xy_controller()
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void AC_PosControl::init_xy_controller()  //初始化xy控制器
 {
-    // set roll, pitch lean angle targets to current attitude
+    // set roll, pitch lean angle targets to current attitude 设置横滚、俯仰目标角度为当前姿态角
     const Vector3f &att_target_euler_cd = _attitude_control.get_att_target_euler_cd();
     _roll_target = att_target_euler_cd.x;
     _pitch_target = att_target_euler_cd.y;
@@ -518,34 +522,34 @@ void AC_PosControl::init_xy_controller()
     _yaw_rate_target = 0.0f;
     _angle_max_override_cd = 0.0;
 
-    _pos_target.xy() = _inav.get_position_xy_cm().topostype();
+    _pos_target.xy() = _inav.get_position_xy_cm().topostype(); //设置位置目标为当前位置
 
-    const Vector2f &curr_vel = _inav.get_velocity_xy_cms();
+    const Vector2f &curr_vel = _inav.get_velocity_xy_cms(); //初始化速度目标和期望速度
     _vel_desired.xy() = curr_vel;
     _vel_target.xy() = curr_vel;
 
-    // Set desired accel to zero because raw acceleration is prone to noise
-    _accel_desired.xy().zero();
+    // Set desired accel to zero because raw acceleration is prone to noise 
+    _accel_desired.xy().zero();           //初始化加速度为零
 
     if (!is_active_xy()) {
-        lean_angles_to_accel_xy(_accel_target.x, _accel_target.y);
+        lean_angles_to_accel_xy(_accel_target.x, _accel_target.y);  //若横向控制未激活，初始化倾角对应的加速度
     }
 
-    // limit acceleration using maximum lean angles
+    // limit acceleration using maximum lean angles 限制加速度目标值
     float angle_max = MIN(_attitude_control.get_althold_lean_angle_max_cd(), get_lean_angle_max_cd());
     float accel_max = angle_to_accel(angle_max * 0.01) * 100.0;
     _accel_target.xy().limit_length(accel_max);
 
-    // initialise I terms from lean angles
+    // initialise I terms from lean angles  初始化速度控制器的积分项
     _pid_vel_xy.reset_filter();
     // initialise the I term to _accel_target - _accel_desired
     // _accel_desired is zero and can be removed from the equation
     _pid_vel_xy.set_integrator(_accel_target.xy() - _vel_target.xy() * _pid_vel_xy.ff());
 
-    // initialise ekf xy reset handler
+    // initialise ekf xy reset handler 初始化 EKF（扩展卡尔曼滤波器）重置处理
     init_ekf_xy_reset();
 
-    // initialise z_controller time out
+    // initialise z_controller time out  初始化 Z 方向控制器的超时时间
     _last_update_xy_ticks = AP::scheduler().ticks32();
 }
 
@@ -554,7 +558,7 @@ void AC_PosControl::init_xy_controller()
 ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_xy.
 ///     The jerk limit defines the acceleration error decay in the kinematic path as the system approaches constant acceleration.
 ///     The jerk limit also defines the time taken to achieve the maximum acceleration.
-void AC_PosControl::input_accel_xy(const Vector3f& accel)
+void AC_PosControl::input_accel_xy(const Vector3f& accel) //加速度平滑规划器
 {
     // check for ekf xy position reset
     handle_ekf_xy_reset();
@@ -568,7 +572,7 @@ void AC_PosControl::input_accel_xy(const Vector3f& accel)
 ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
 ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_xy.
 ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-void AC_PosControl::input_vel_accel_xy(Vector2f& vel, const Vector2f& accel, bool limit_output)
+void AC_PosControl::input_vel_accel_xy(Vector2f& vel, const Vector2f& accel, bool limit_output)  //速度和加速度联合平滑规划器
 {
     update_pos_vel_accel_xy(_pos_target.xy(), _vel_desired.xy(), _accel_desired.xy(), _dt, _limit_vector.xy(), _p_pos_xy.get_error(), _pid_vel_xy.get_error());
 
@@ -583,7 +587,7 @@ void AC_PosControl::input_vel_accel_xy(Vector2f& vel, const Vector2f& accel, boo
 ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
 ///     The function alters the pos and vel to be the kinematic path based on accel
 ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-void AC_PosControl::input_pos_vel_accel_xy(Vector2p& pos, Vector2f& vel, const Vector2f& accel, bool limit_output)
+void AC_PosControl::input_pos_vel_accel_xy(Vector2p& pos, Vector2f& vel, const Vector2f& accel, bool limit_output) //位置，速度，加速度联合平滑规划器
 {
     update_pos_vel_accel_xy(_pos_target.xy(), _vel_desired.xy(), _accel_desired.xy(), _dt, _limit_vector.xy(), _p_pos_xy.get_error(), _pid_vel_xy.get_error());
 
@@ -593,14 +597,14 @@ void AC_PosControl::input_pos_vel_accel_xy(Vector2p& pos, Vector2f& vel, const V
     update_pos_vel_accel_xy(pos, vel, accel, _dt, Vector2f(), Vector2f(), Vector2f());
 }
 
-/// stop_pos_xy_stabilisation - sets the target to the current position to remove any position corrections from the system
-void AC_PosControl::stop_pos_xy_stabilisation()
+/// stop_pos_xy_stabilisation - sets the target to the current position to remove any position corrections from the system //稳定悬停：误差消除器
+void AC_PosControl::stop_pos_xy_stabilisation() 
 {
     _pos_target.xy() = _inav.get_position_xy_cm().topostype();
 }
 
-/// stop_vel_xy_stabilisation - sets the target to the current position and velocity to the current velocity to remove any position and velocity corrections from the system
-void AC_PosControl::stop_vel_xy_stabilisation()
+/// stop_vel_xy_stabilisation - sets the target to the current position and velocity to the current velocity to remove any position and velocity corrections from the system //稳定悬停：误差消除器
+void AC_PosControl::stop_vel_xy_stabilisation() 
 {
     _pos_target.xy() =  _inav.get_position_xy_cm().topostype();
 
@@ -614,7 +618,7 @@ void AC_PosControl::stop_vel_xy_stabilisation()
     _pid_vel_xy.reset_I();
 }
 
-// is_active_xy - returns true if the xy position controller has been run in the previous loop
+// is_active_xy - returns true if the xy position controller has been run in the previous loop 判断控制器激活状态
 bool AC_PosControl::is_active_xy() const
 {
     const uint32_t dt_ticks = AP::scheduler().ticks32() - _last_update_xy_ticks;
@@ -625,33 +629,32 @@ bool AC_PosControl::is_active_xy() const
 ///     Position and velocity errors are converted to velocity and acceleration targets using PID objects
 ///     Desired velocity and accelerations are added to these corrections as they are calculated
 ///     Kinematically consistent target position and desired velocity and accelerations should be provided before calling this function
-void AC_PosControl::update_xy_controller()
+void AC_PosControl::update_xy_controller() //横向位置控制器运行（更新）
 {
-    // check for ekf xy position reset
+    // check for ekf xy position reset **EKF XY 位置重置检查**
     handle_ekf_xy_reset();
 
-    // Check for position control time out
+    // Check for position control time out **位置控制超时检查**
     if (!is_active_xy()) {
         init_xy_controller();
         if (has_good_timing()) {
-            // call internal error because initialisation has not been done
+            // call internal error because initialisation has not been done 
             INTERNAL_ERROR(AP_InternalError::error_t::flow_of_control);
         }
     }
-    _last_update_xy_ticks = AP::scheduler().ticks32();
+    _last_update_xy_ticks = AP::scheduler().ticks32(); //**更新最后一次控制器调用时间**
 
-    float ahrsGndSpdLimit, ahrsControlScaleXY;
-    AP::ahrs().getControlLimits(ahrsGndSpdLimit, ahrsControlScaleXY);
+    float ahrsGndSpdLimit, ahrsControlScaleXY; 
+    AP::ahrs().getControlLimits(ahrsGndSpdLimit, ahrsControlScaleXY); //**获取控制限制参数**
 
-    // Position Controller
+    // Position Controller  **位置控制器部分**
 
-    const Vector3f &curr_pos = _inav.get_position_neu_cm();
-    // determine the combined position of the actual position and the disturbance from system ID mode
+    const Vector3f &curr_pos = _inav.get_position_neu_cm(); //**获取当前位置**
+    // determine the combined position of the actual position and the disturbance from system ID mode 
     Vector3f comb_pos = curr_pos;
-    comb_pos.xy() += _disturb_pos;
-    Vector2f vel_target = _p_pos_xy.update_all(_pos_target.x, _pos_target.y, comb_pos);
-
-    // add velocity feed-forward scaled to compensate for optical flow measurement induced EKF noise
+    comb_pos.xy() += _disturb_pos; //扰动的叠加
+    Vector2f vel_target = _p_pos_xy.update_all(_pos_target.x, _pos_target.y, comb_pos);// 通过位置误差计算目标速度 
+    // add velocity feed-forward scaled to compensate for optical flow measurement induced EKF noise 速度比例调整 
     vel_target *= ahrsControlScaleXY;
     _vel_target.xy() = vel_target;
     _vel_target.xy() += _vel_desired.xy();
