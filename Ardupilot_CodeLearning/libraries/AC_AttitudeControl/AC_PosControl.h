@@ -442,7 +442,7 @@ protected:
     AP_AHRS_View&           _ahrs;
     const AP_InertialNav&   _inav;
     const class AP_Motors&  _motors;
-    AC_AttitudeControl&     _attitude_control;
+    AC_AttitudeControl&     _attitude_control; // _attitude_control是已经在外部创建好的成员变量
 
     // parameters //控制器变量 （声明类创建的对象）
     AP_Float        _lean_angle_max;    // Maximum autopilot commanded angle (in degrees). Set to zero for Angle Max
@@ -477,7 +477,7 @@ protected:
 
     // position controller internal variables //控制器与内部变量
     Vector3p    _pos_target;            // target location, frame NEU in cm relative to the EKF origin
-    Vector3f    _vel_desired;           // desired velocity in NEU cm/s
+    Vector3f    _vel_desired;           // desired velocity in NEU cm/s                                                       ////Vector3f是一种浮点型三维向量数据类型
     Vector3f    _vel_target;            // velocity target in NEU cm/s calculated by pos_to_rate step
     Vector3f    _accel_desired;         // desired acceleration in NEU cm/s/s (feed forward)
     Vector3f    _accel_target;          // acceleration target in NEU cm/s/s

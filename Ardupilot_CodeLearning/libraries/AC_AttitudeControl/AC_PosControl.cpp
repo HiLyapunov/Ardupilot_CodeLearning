@@ -647,25 +647,25 @@ void AC_PosControl::update_xy_controller() //横向位置控制器运行（更�
     float ahrsGndSpdLimit, ahrsControlScaleXY; 
     AP::ahrs().getControlLimits(ahrsGndSpdLimit, ahrsControlScaleXY); //**获取控制限制参数**
 
-    // Position Controller  **位置控制器部分**
+    // Position Controller  位置控制器 输入：目标位置 输出：平滑后的目标速度
 
     const Vector3f &curr_pos = _inav.get_position_neu_cm(); //**获取当前位置**
     // determine the combined position of the actual position and the disturbance from system ID mode 
     Vector3f comb_pos = curr_pos;
     comb_pos.xy() += _disturb_pos; //扰动的叠加
     Vector2f vel_target = _p_pos_xy.update_all(_pos_target.x, _pos_target.y, comb_pos);// 通过位置误差计算目标速度 
-    // add velocity feed-forward scaled to compensate for optical flow measurement induced EKF noise 速度比例调整 
+    // add velocity feed-forward scaled to compensate for optical flow measurement induced EKF noise //速度比例调整 
     vel_target *= ahrsControlScaleXY;
     _vel_target.xy() = vel_target;
-    _vel_target.xy() += _vel_desired.xy();
+    _vel_target.xy() += _vel_desired.xy(); //加入期望的速度前馈，让初始状态就快速响应得到一个速度值
 
-    // Velocity Controller
+    // Velocity Controller  速度控制器 输入：目标速度 输出：目标加速度
 
-    const Vector2f &curr_vel = _inav.get_velocity_xy_cms();
+    const Vector2f &curr_vel = _inav.get_velocity_xy_cms(); //获取当前横向速度
     // determine the combined velocity of the actual velocity and the disturbance from system ID mode
     Vector2f comb_vel = curr_vel;
     comb_vel += _disturb_vel;
-    Vector2f accel_target = _pid_vel_xy.update_all(_vel_target.xy(), comb_vel, _dt, _limit_vector.xy());
+    Vector2f accel_target = _pid_vel_xy.update_all(_vel_target.xy(), comb_vel, _dt, _limit_vector.xy()); //_pid_vel_xy是在头文件中用PID库中的类创建的对象，update_all是其中的一个方法
     
     // acceleration to correct for velocity error and scale PID output to compensate for optical flow measurement induced EKF noise
     accel_target *= ahrsControlScaleXY;
@@ -673,10 +673,10 @@ void AC_PosControl::update_xy_controller() //横向位置控制器运行（更�
     // pass the correction acceleration to the target acceleration output
     _accel_target.xy() = accel_target;
 
-    // Add feed forward into the target acceleration output
+    // Add feed forward into the target acceleration output //加入期望的加速度前馈，让初始状态就快速响应得到一个加速度值
     _accel_target.xy() += _accel_desired.xy();
 
-    // Acceleration Controller
+    // Acceleration Controller 加速度控制器 输入：目标加速度 输出：欧拉角目标值
 
     // limit acceleration using maximum lean angles
     float angle_max = MIN(_attitude_control.get_althold_lean_angle_max_cd(), get_lean_angle_max_cd());
