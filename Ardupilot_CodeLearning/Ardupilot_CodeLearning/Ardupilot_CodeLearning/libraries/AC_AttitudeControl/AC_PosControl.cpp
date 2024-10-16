@@ -713,9 +713,9 @@ void AC_PosControl::update_xy_controller() //横向位置控制器运行（更�
 ///     This function only needs to be called if using the kinematic shaping.
 ///     This can be done at any time as changes in these parameters are handled smoothly
 ///     by the kinematic shaping.
-void AC_PosControl::set_max_speed_accel_z(float speed_down, float speed_up, float accel_cmss)
+void AC_PosControl::set_max_speed_accel_z(float speed_down, float speed_up, float accel_cmss) //设置垂直方向的最大速度和加速度
 {
-    // ensure speed_down is always negative
+    // ensure speed_down is always negative 确保下降速度始终负值向下
     speed_down = -fabsf(speed_down);
 
     // sanity check and update
@@ -742,7 +742,7 @@ void AC_PosControl::set_max_speed_accel_z(float speed_down, float speed_up, floa
 /// set_correction_speed_accel_z - set the position controller correction velocity and acceleration limit
 ///     speed_down can be positive or negative but will always be interpreted as a descent speed.
 ///     This should be done only during initialisation to avoid discontinuities
-void AC_PosControl::set_correction_speed_accel_z(float speed_down, float speed_up, float accel_cmss)
+void AC_PosControl::set_correction_speed_accel_z(float speed_down, float speed_up, float accel_cmss) //设置垂直方向的最大速度和加速度函数
 {
     // define maximum position error and maximum first and second differential limits
     _p_pos_z.set_limits(-fabsf(speed_down), speed_up, accel_cmss, 0.0f);
@@ -751,12 +751,12 @@ void AC_PosControl::set_correction_speed_accel_z(float speed_down, float speed_u
 /// init_z_controller - initialise the position controller to the current position, velocity, acceleration and attitude.
 ///     This function is the default initialisation for any position control that provides position, velocity and acceleration.
 ///     This function does not allow any negative velocity or acceleration
-void AC_PosControl::init_z_controller_no_descent()
+void AC_PosControl::init_z_controller_no_descent() //初始化垂直位置控制器
 {
     // Initialise the position controller to the current throttle, position, velocity and acceleration.
     init_z_controller();
 
-    // remove all descent if present
+    // remove all descent if present 去除所有的下降分量
     _vel_desired.z = MAX(0.0, _vel_desired.z);
     _vel_target.z = MAX(0.0, _vel_target.z);
     _accel_desired.z = MAX(0.0, _accel_desired.z);
@@ -766,7 +766,7 @@ void AC_PosControl::init_z_controller_no_descent()
 /// init_z_controller_stopping_point - initialise the position controller to the stopping point with zero velocity and acceleration.
 ///     This function should be used when the expected kinematic path assumes a stationary initial condition but does not specify a specific starting position.
 ///     The starting position can be retrieved by getting the position target using get_pos_target_cm() after calling this function.
-void AC_PosControl::init_z_controller_stopping_point()
+void AC_PosControl::init_z_controller_stopping_point() //初始化垂直位置控制器到停止点
 {
     // Initialise the position controller to the current throttle, position, velocity and acceleration.
     init_z_controller();
@@ -778,7 +778,7 @@ void AC_PosControl::init_z_controller_stopping_point()
 
 // relax_z_controller - initialise the position controller to the current position and velocity with decaying acceleration.
 ///     This function decays the output acceleration by 95% every half second to achieve a smooth transition to zero requested acceleration.
-void AC_PosControl::relax_z_controller(float throttle_setting)
+void AC_PosControl::relax_z_controller(float throttle_setting) //初始化控制器并平滑过渡
 {
     // Initialise the position controller to the current position, velocity and acceleration.
     init_z_controller();
@@ -791,7 +791,7 @@ void AC_PosControl::relax_z_controller(float throttle_setting)
 /// init_z_controller - initialise the position controller to the current position, velocity, acceleration and attitude.
 ///     This function is the default initialisation for any position control that provides position, velocity and acceleration.
 ///     This function is private and contains all the shared z axis initialisation functions
-void AC_PosControl::init_z_controller()
+void AC_PosControl::init_z_controller() /////////////////////////////初始化垂直控制器PID
 {
     _pos_target.z = _inav.get_position_z_up_cm();
 
@@ -822,7 +822,7 @@ void AC_PosControl::init_z_controller()
         - _pid_accel_z.kP() * (_accel_target.z - get_z_accel_cmss())
         - _pid_accel_z.ff() * _accel_target.z);
 
-    // initialise ekf z reset handler
+    // initialise ekf z reset handler 
     init_ekf_z_reset();
 
     // initialise z_controller time out
@@ -831,7 +831,7 @@ void AC_PosControl::init_z_controller()
 
 /// input_accel_z - calculate a jerk limited path from the current position, velocity and acceleration to an input acceleration.
 ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
-void AC_PosControl::input_accel_z(float accel)
+void AC_PosControl::input_accel_z(float accel) //通过跃度jerk限制目标加速度，全局平滑化
 {
     // calculated increased maximum jerk if over speed
     float jerk_max_z_cmsss = _jerk_max_z_cmsss * calculate_overspeed_gain();
@@ -846,7 +846,7 @@ void AC_PosControl::input_accel_z(float accel)
 ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
 ///     The kinematic path is constrained by the maximum acceleration and jerk set using the function set_max_speed_accel_z.
 ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-void AC_PosControl::input_vel_accel_z(float &vel, float accel, bool limit_output)
+void AC_PosControl::input_vel_accel_z(float &vel, float accel, bool limit_output) //通过加速度限制速度，全局平滑化
 {
     // calculated increased maximum acceleration and jerk if over speed
     const float overspeed_gain = calculate_overspeed_gain();
@@ -867,7 +867,7 @@ void AC_PosControl::input_vel_accel_z(float &vel, float accel, bool limit_output
 /// set_pos_target_z_from_climb_rate_cm - adjusts target up or down using a commanded climb rate in cm/s
 ///     using the default position control kinematic path.
 ///     The zero target altitude is varied to follow pos_offset_z
-void AC_PosControl::set_pos_target_z_from_climb_rate_cm(float vel)
+void AC_PosControl::set_pos_target_z_from_climb_rate_cm(float vel)  //////////////地形偏移高度控制函数
 {
     // remove terrain offsets for flat earth assumption
     _pos_target.z -= _pos_offset_z;
@@ -889,7 +889,7 @@ void AC_PosControl::set_pos_target_z_from_climb_rate_cm(float vel)
 /// land_at_climb_rate_cm - adjusts target up or down using a commanded climb rate in cm/s
 ///     using the default position control kinematic path.
 ///     ignore_descent_limit turns off output saturation handling to aid in landing detection. ignore_descent_limit should be false unless landing.
-void AC_PosControl::land_at_climb_rate_cm(float vel, bool ignore_descent_limit)
+void AC_PosControl::land_at_climb_rate_cm(float vel, bool ignore_descent_limit) //////////////调整降落爬升律
 {
     if (ignore_descent_limit) {
         // turn off limits in the negative z direction
@@ -904,7 +904,7 @@ void AC_PosControl::land_at_climb_rate_cm(float vel, bool ignore_descent_limit)
 ///     The function takes the current position, velocity, and acceleration and calculates the required jerk limited adjustment to the acceleration for the next time dt.
 ///     The function alters the pos and vel to be the kinematic path based on accel
 ///     The parameter limit_output specifies if the velocity and acceleration limits are applied to the sum of commanded and correction values or just correction.
-void AC_PosControl::input_pos_vel_accel_z(float &pos, float &vel, float accel, bool limit_output)
+void AC_PosControl::input_pos_vel_accel_z(float &pos, float &vel, float accel, bool limit_output)  ///全局平滑目标加速度，目标速度，目标位置轨迹，不属于控制逻辑
 {
     // calculated increased maximum acceleration and jerk if over speed
     const float overspeed_gain = calculate_overspeed_gain();
@@ -927,13 +927,13 @@ void AC_PosControl::input_pos_vel_accel_z(float &pos, float &vel, float accel, b
 
 /// set_alt_target_with_slew - adjusts target up or down using a commanded altitude in cm
 ///     using the default position control kinematic path.
-void AC_PosControl::set_alt_target_with_slew(float pos)
+void AC_PosControl::set_alt_target_with_slew(float pos) ///设置目标加速度和目标速度为0，仅依赖位置误差进行平滑的高度变化
 {
     float zero = 0;
     input_pos_vel_accel_z(pos, zero, 0);
 }
 
-/// update_pos_offset_z - updates the vertical offsets used by terrain following
+/// update_pos_offset_z - updates the vertical offsets used by terrain following  ////////////////更新垂直偏移量
 void AC_PosControl::update_pos_offset_z(float pos_offset_z)
 {
     postype_t p_offset_z = _pos_offset_z;
@@ -948,7 +948,7 @@ void AC_PosControl::update_pos_offset_z(float pos_offset_z)
         _jerk_max_z_cmsss, _dt, false);
 }
 
-// is_active_z - returns true if the z position controller has been run in the previous loop
+// is_active_z - returns true if the z position controller has been run in the previous loop ////检查垂直控制器是否活跃
 bool AC_PosControl::is_active_z() const
 {
     const uint32_t dt_ticks = AP::scheduler().ticks32() - _last_update_z_ticks;
@@ -959,12 +959,12 @@ bool AC_PosControl::is_active_z() const
 ///     Position and velocity errors are converted to velocity and acceleration targets using PID objects
 ///     Desired velocity and accelerations are added to these corrections as they are calculated
 ///     Kinematically consistent target position and desired velocity and accelerations should be provided before calling this function
-void AC_PosControl::update_z_controller()
+void AC_PosControl::update_z_controller()  /////////////////////////////////更新垂直控制器
 {
     // check for ekf z-axis position reset
     handle_ekf_z_reset();
 
-    // Check for z_controller time out
+    // Check for z_controller time out//////////////////////////检查控制器是否活跃
     if (!is_active_z()) {
         init_z_controller();
         if (has_good_timing()) {
@@ -974,7 +974,7 @@ void AC_PosControl::update_z_controller()
     }
     _last_update_z_ticks = AP::scheduler().ticks32();
 
-    // calculate the target velocity correction
+    // calculate the target velocity correction 计算目标速度修正
     float pos_target_zf = _pos_target.z;
 
     _vel_target.z = _p_pos_z.update_all(pos_target_zf, _inav.get_position_z_up_cm());
@@ -982,31 +982,31 @@ void AC_PosControl::update_z_controller()
 
     _pos_target.z = pos_target_zf;
 
-    // add feed forward component
+    // add feed forward component 目标速度前馈
     _vel_target.z += _vel_desired.z;
 
-    // Velocity Controller
+    // Velocity Controller  垂直速度控制器（输出目标加速度）
 
     const float curr_vel_z = _inav.get_velocity_z_up_cms();
     _accel_target.z = _pid_vel_z.update_all(_vel_target.z, curr_vel_z, _dt, _motors.limit.throttle_lower, _motors.limit.throttle_upper);
     _accel_target.z *= AP::ahrs().getControlScaleZ();
 
-    // add feed forward component
+    // add feed forward component 目标加速度前馈
     _accel_target.z += _accel_desired.z;
 
-    // Acceleration Controller
+    // Acceleration Controller 垂直加速度控制器 
 
-    // Calculate vertical acceleration
+    // Calculate vertical acceleration  获取测量到的加速度
     const float z_accel_meas = get_z_accel_cmss();
 
-    // ensure imax is always large enough to overpower hover throttle
+    // ensure imax is always large enough to overpower hover throttle //////////////设定积分项imax不能超过某个最大值，如果超过的话set为这个值
     if (_motors.get_throttle_hover() * 1000.0f > _pid_accel_z.imax()) {
         _pid_accel_z.set_imax(_motors.get_throttle_hover() * 1000.0f);
     }
     float thr_out;
-    if (_vibe_comp_enabled) {
+    if (_vibe_comp_enabled) {      /////如果震动补偿算法被启用
         thr_out = get_throttle_with_vibration_override();
-    } else {
+    } else {    ////启用PID算法
         thr_out = _pid_accel_z.update_all(_accel_target.z, z_accel_meas, _dt, (_motors.limit.throttle_lower || _motors.limit.throttle_upper)) * 0.001f;
         thr_out += _pid_accel_z.get_ff() * 0.001f;
     }
@@ -1086,6 +1086,7 @@ Vector3f AC_PosControl::lean_angles_to_accel(const Vector3f& att_target_euler) c
 }
 
 // returns the NED target acceleration vector for attitude control
+
 Vector3f AC_PosControl::get_thrust_vector() const
 {
     Vector3f accel_target = get_accel_target_cmss();
